@@ -1,16 +1,87 @@
-# React + Vite
+# TaskMaster
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
 
-Currently, two official plugins are available:
+**Aplicación Full Stack de gestión de tareas** con autenticación de usuarios.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Demo en vivo
+**[https://taskmaster-fullstack.vercel.app](https://taskmaster-fullstack.vercel.app)**
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Características
 
-## Expanding the Oxlint configuration
+- Registro e inicio de sesión con JWT
+- Crear, editar, completar y eliminar tareas
+- Filtros: Todas / Pendientes / Completadas
+- Fecha y hora de creación de cada tarea
+- Interfaz moderna, limpia y responsive
+- Componentes reutilizables en React
+- Backend y Frontend completamente desplegados
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+---
+
+## Capturas de pantalla
+
+### Pantalla de Login / Registro
+![Login](screenshots/login.png)
+
+### Lista de Tareas
+![Tareas](screenshots/tasks.png)
+
+---
+
+## Tecnologías utilizadas
+
+**Backend**
+- FastAPI
+- SQLAlchemy + SQLite
+- JWT (python-jose + passlib)
+- Desplegado en [Render](https://render.com)
+
+**Frontend**
+- React 18
+- Vite
+- Componentes funcionales + Hooks
+- Desplegado en [Vercel](https://vercel.com)
+
+---
+
+## Estructura del proyecto
+
+``bash
+taskmaster-fullstack/
+├── backend/                  # API REST con FastAPI
+│   ├── app/
+│   │   ├── core/             # Configuración y seguridad
+│   │   ├── models/           # Modelos de base de datos
+│   │   ├── routers/          # Endpoints
+│   │   └── schemas/          # Validación con Pydantic
+│   └── requirements.txt
+├── frontend-react/           # Frontend con React + Vite
+│   └── src/
+│       └── components/       # Componentes reutilizables
+└── README.md
+
+## Cómo correrlo en local
+
+### Backend
+cd backend
+python -m venv venv
+# Windows
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+### Frontend
+cd frontend-react
+npm install
+npm run dev
+
+### Autor
+
+Hecho con fines de aprendizaje.

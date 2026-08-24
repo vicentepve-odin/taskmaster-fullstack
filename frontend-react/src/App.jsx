@@ -4,7 +4,7 @@ import Login from './components/Login';
 import TaskForm from './components/TaskForm';
 import TaskList from './components/TaskList';
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://taskmaster-api-wtpf.onrender.com";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
