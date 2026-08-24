@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import Login from './components/Login';
+import TaskForm from './components/TaskForm';
+import TaskList from './components/TaskList';
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -7,12 +10,14 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [authMessage, setAuthMessage] = useState("");
+  const [authMessage, setAuthMessage] = useState({ text: "", type: "" });
   const [tasks, setTasks] = useState([]);
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [tasksLoading, setTasksLoading] = useState(false);
+  const [filter, setFilter] = useState("all");
 
-  // Cargar tareas cuando hay token
   useEffect(() => {
     if (token) {
       loadTasks();
@@ -21,6 +26,12 @@ function App() {
 
   // ---------- AUTENTICACIÓN ----------
   const register = async () => {
+    if (!email || !password) {
+      setAuthMessage({ text: "Por favor completa todos los campos", type: "error" });
+      return;
+    }
+
+    setLoading(true);
     try {
       const response = await fetch(`${API_URL}/users/register`, {
         method: "POST",
@@ -29,17 +40,26 @@ function App() {
       });
 
       if (response.ok) {
-        setAuthMessage("Registro exitoso. Ahora inicia sesión.");
+        setAuthMessage({ text: "Registro exitoso. Ahora puedes iniciar sesión.", type: "success" });
+        setPassword("");
       } else {
         const error = await response.json();
-        setAuthMessage(error.detail || "Error al registrarse");
+        setAuthMessage({ text: error.detail || "Error al registrarse", type: "error" });
       }
     } catch (error) {
-      setAuthMessage("Error de conexión con el servidor");
+      setAuthMessage({ text: "Error de conexión con el servidor", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
   const login = async () => {
+    if (!email || !password) {
+      setAuthMessage({ text: "Por favor completa todos los campos", type: "error" });
+      return;
+    }
+
+    setLoading(true);
     const formData = new FormData();
     formData.append("username", email);
     formData.append("password", password);
@@ -54,12 +74,16 @@ function App() {
         const data = await response.json();
         localStorage.setItem("token", data.access_token);
         setToken(data.access_token);
-        setAuthMessage("");
+        setAuthMessage({ text: "", type: "" });
+        setEmail("");
+        setPassword("");
       } else {
-        setAuthMessage("Email o contraseña incorrectos");
+        setAuthMessage({ text: "Email o contraseña incorrectos", type: "error" });
       }
     } catch (error) {
-      setAuthMessage("Error de conexión con el servidor");
+      setAuthMessage({ text: "Error de conexión con el servidor", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,12 +91,11 @@ function App() {
     localStorage.removeItem("token");
     setToken(null);
     setTasks([]);
-    setEmail("");
-    setPassword("");
   };
 
   // ---------- TAREAS ----------
   const loadTasks = async () => {
+    setTasksLoading(true);
     try {
       const response = await fetch(`${API_URL}/tasks/`, {
         headers: { "Authorization": `Bearer ${token}` }
@@ -86,6 +109,8 @@ function App() {
       }
     } catch (error) {
       console.error("Error al cargar tareas:", error);
+    } finally {
+      setTasksLoading(false);
     }
   };
 
@@ -129,11 +154,26 @@ function App() {
         })
       });
 
-      if (response.ok) {
-        loadTasks();
-      }
+      if (response.ok) loadTasks();
     } catch (error) {
-      console.error("Error al actualizar tarea:", error);
+      console.error(error);
+    }
+  };
+
+  const updateTask = async (id, title, description, completed) => {
+    try {
+      const response = await fetch(`${API_URL}/tasks/${id}?completed=${completed}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, description })
+      });
+
+      if (response.ok) loadTasks();
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -146,80 +186,54 @@ function App() {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
-      if (response.ok) {
-        loadTasks();
-      }
+      if (response.ok) loadTasks();
     } catch (error) {
-      console.error("Error al eliminar tarea:", error);
+      console.error(error);
     }
   };
 
-  // ---------- RENDER ----------
   return (
     <div className="container">
       <h1>TaskMaster</h1>
+      <p className="subtitle">Organiza tus tareas de forma simple y elegante</p>
 
       {!token ? (
-        // Pantalla de Login / Registro
-        <div>
-          <h2>Iniciar Sesión</h2>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button onClick={login}>Iniciar Sesión</button>
-          <button onClick={register}>Registrarse</button>
-          {authMessage && <p className="auth-message">{authMessage}</p>}
-        </div>
+        <Login
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          onLogin={login}
+          onRegister={register}
+          authMessage={authMessage}
+          loading={loading}
+        />
       ) : (
-        // Pantalla de Tareas
         <div>
-          <h2>Mis Tareas</h2>
-          <button onClick={logout}>Cerrar Sesión</button>
-
-          <div className="new-task">
-            <input
-              type="text"
-              placeholder="Título de la tarea"
-              value={taskTitle}
-              onChange={(e) => setTaskTitle(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Descripción (opcional)"
-              value={taskDescription}
-              onChange={(e) => setTaskDescription(e.target.value)}
-            />
-            <button onClick={createTask}>Agregar Tarea</button>
+          <div className="header-actions">
+            <h2>Mis Tareas</h2>
+            <button className="logout-btn" onClick={logout}>
+              Cerrar Sesión
+            </button>
           </div>
 
-          <ul className="tasks-list">
-            {tasks.length === 0 && <p>No tienes tareas todavía.</p>}
-            {tasks.map((task) => (
-              <li key={task.id} className={task.completed ? "completed" : ""}>
-                <div>
-                  <strong>{task.title}</strong>
-                  <p>{task.description}</p>
-                </div>
-                <div className="task-actions">
-                  <button onClick={() => toggleTask(task)}>
-                    {task.completed ? "Desmarcar" : "Completar"}
-                  </button>
-                  <button className="delete-btn" onClick={() => deleteTask(task.id)}>
-                    Eliminar
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <TaskForm
+            title={taskTitle}
+            setTitle={setTaskTitle}
+            description={taskDescription}
+            setDescription={setTaskDescription}
+            onSubmit={createTask}
+          />
+
+          <TaskList
+            tasks={tasks}
+            loading={tasksLoading}
+            filter={filter}
+            setFilter={setFilter}
+            onToggle={toggleTask}
+            onDelete={deleteTask}
+            onUpdate={updateTask}
+          />
         </div>
       )}
     </div>
