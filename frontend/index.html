@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TaskMaster</h1>
+
+        <!-- Sección de Login / Registro -->
+        <div id="auth-section">
+            <h2>Iniciar Sesión</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button onclick="login()">Iniciar Sesión</button>
+            <button onclick="register()">Registrarse</button>
+            <p id="auth-message"></p>
+        </div>
+
+        <!-- Sección de Tareas (oculta al principio) -->
+        <div id="tasks-section" style="display: none;">
+            <h2>Mis Tareas</h2>
+            <button onclick="logout()">Cerrar Sesión</button>
+            
+            <div class="new-task">
+                <input type="text" id="task-title" placeholder="Título de la tarea">
+                <input type="text" id="task-description" placeholder="Descripción (opcional)">
+                <button onclick="createTask()">Agregar Tarea</button>
+            </div>
+
+            <ul id="tasks-list"></ul>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
